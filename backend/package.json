@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "a full stack mom restaurant website",
+  "license": "ISC",
+  "author": "ujjwol",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "start_server",
+    "start": "nodemon index.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
