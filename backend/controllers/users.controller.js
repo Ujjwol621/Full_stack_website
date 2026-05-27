@@ -1,5 +1,6 @@
 const userModel = require("../models/user.models");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userRegister = async (req, res) => {
   try {
@@ -19,7 +20,13 @@ const userRegister = async (req, res) => {
       email,
       password: hashpassword,
     });
-    res.status(201).json({
+
+    const token = jwt.sign({
+      id: user._id,
+    }, "ajaksdfjddkjba", { expiresIn: "2h" });
+
+
+    res.status(201).cookie("token",token).json({
       message: "User registered successfully",
       success: true,
       user,
@@ -31,4 +38,71 @@ const userRegister = async (req, res) => {
     });
   }
 };
-module.exports = userRegister;
+const userLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const User = await userModel.findOne({ email: email });
+
+    if (!User) {
+      return res.status(400).json({
+        message: "User not registered yet",
+        success: false,
+      });
+    }
+    const isMatchPassword = await bcrypt.compare(password, User.password);
+    if (!isMatchPassword) {
+      return res.status(400).json({
+        message: "Invalid Password",
+        success: false,
+      });
+    }
+    let user = User;
+
+    const token = jwt.sign({
+      id: user._id,
+    }, "ajaksdfjddkjba", { expiresIn: "2h" });
+
+
+    res.status(200).cookie("token",token).json({
+      message: "User logged in successfully",
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+};
+const userLogout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.status(200).json({
+      message: "User logged out successfully",
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+};
+const getUser = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      message: "User data retrieved successfully",
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+};
+module.exports = { userRegister, userLogin, userLogout, getUser };
